@@ -7,6 +7,8 @@ import { getAllProducts, createProduct, getProductByProdId, updateProduct } from
 import { generatePrefixedId } from "../utils/IdGenerator.js";
 import { getUserByUserId } from "../services/user.js"
 
+import { authenticateUser } from "../middlewares/auth.js";
+
 const router = express.Router();
 
 router.get("/", async (req, res) => {
@@ -21,39 +23,12 @@ router.get("/", async (req, res) => {
 });
 
 //Add new product
-router.post("/", async (req, res) => {
+router.post("/", authenticateUser, async (req, res) => {
     const { title, desc, price } = req.body;
 
     if (!title || !desc || !price) {
     return res.status(400).json({ message: "Missing required fields" });
   }
-
-  //AUTH FLYTTA TILL MIDDLEWARES SEN??
-
-  if(req.headers.authorization) {
-    const token = req.headers.authorization.replace("Bearer ", '')
-    try {
-        const decoded = jwt.verify(token, 'emilia')
-        const user = await getUserByUserId(decoded.userId)
-
-        res.json({
-            success : true,
-            user : user,
-        })
-    } catch(error) {
-        res.status(400).json({
-            success : false, 
-            message : error.message
-        })
-    }
-  } else {
-    res.status(400).json({
-        success : false,
-        message : "No token provided"
-    })
-  }
-
-  ///SLUT PÅ AUTH
 
   try {
     const newProduct = await createProduct({
@@ -76,7 +51,7 @@ router.post("/", async (req, res) => {
 
 
 //Uppdatera produkt
-router.put( '/:prodId', async(req, res) => {
+router.put( '/:prodId', authenticateUser, async(req, res) => {
     const { prodId } = req.params;
     const { title, desc, price } = req.body;
 
@@ -107,7 +82,7 @@ router.put( '/:prodId', async(req, res) => {
   };
 });
 
-router.delete('/:prodId', async (req, res) => {
+router.delete('/:prodId', authenticateUser, async (req, res) => {
   const { prodId } = req.params; 
 
   try {
