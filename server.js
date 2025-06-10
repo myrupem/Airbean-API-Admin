@@ -10,6 +10,7 @@ import cartRoutes from "./routes/cart.js";
 import menuRoutes from "./routes/menu.js";
 import promotionRoutes from "./routes/promotions.js";
 import orderRoutes from "./routes/order.js";
+import adminRoutes from "./routes/admin.js"
 
 // configuration
 dotenv.config(); // Detta laddar miljövariabler från en .env-fil
@@ -31,6 +32,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/menu", menuRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/promotions", promotionRoutes);
+app.use("/api/admin", adminRoutes);
 
 database.on("error", (error) => {
   console.error("Database connection error:", error);

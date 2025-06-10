@@ -3,6 +3,7 @@ import User from "../models/user.js";
 import { generatePrefixedId } from "../utils/IdGenerator.js";
 import { createUser, findUserByUsername } from "../services/user.js";
 import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
 
 import { validateAuthBody } from "../middlewares/validators.js";
 
@@ -62,7 +63,14 @@ router.post("/login", validateAuthBody, async (req, res) => {
   try {
     const user = await User.findOne({ username });
     const isSame = await bcrypt.compare(password, user.password)
+
     if (user && isSame) {
+      const token = jwt.sign({ userId : user.userId, username : user.username },
+        'emilia', {
+          expiresIn : 60 * 10 //10 min
+        }
+      )
+
       global.user = {
       userId: user.userId,
       username: user.username,
@@ -72,6 +80,7 @@ router.post("/login", validateAuthBody, async (req, res) => {
     res.json({
       message: "Inloggning lyckades",
       user: global.user,
+      token : `Bearer ${token}`
     });
     } else {
       return res

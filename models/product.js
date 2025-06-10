@@ -19,6 +19,13 @@ const productSchema = new Schema({
         type: Number,
         required: true
     },
+    createdAt: {
+        type: String,
+        required: true
+    },
+    modifiedAt: {
+        type: String
+    },
 });
 
 const Product = mongoose.model('Product', productSchema);
