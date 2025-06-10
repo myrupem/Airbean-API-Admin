@@ -5,6 +5,7 @@ import { getCart } from '../services/cart.js';
 import { getAllCarts } from '../services/cart.js';
 
 const router = Router();
+
 // GET all carts
 router.get('/', async (req, res, next) => {
   try {

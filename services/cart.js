@@ -1,4 +1,5 @@
 import Cart from "../models/cart.js";
+import Product from "../models/product.js";
 
 import { generatePrefixedId } from "../utils/IdGenerator.js";
 
@@ -49,11 +50,15 @@ export const updateCart = async (req, res, next) => {
     }
 
     await cart.save();
-    res.json({ success: true, cart });
+    res.json({ 
+      success: true, 
+      cart
+    });
   } catch (err) {
     next(err);
   }
 };
+
 export async function getAllCarts() {
   try {
     return await Cart.find();
