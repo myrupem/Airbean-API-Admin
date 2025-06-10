@@ -2,6 +2,8 @@ import express from "express";
 import User from "../models/user.js";
 import { generatePrefixedId } from "../utils/IdGenerator.js";
 import { createUser, findUserByUsername } from "../services/user.js";
+import { comparePasswords, hashPassword, signToken } from "../utils/bcryptAndTokens.js";
+
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 
@@ -12,7 +14,7 @@ const router = express.Router();
 // REGISTER
 // POST /api/auth/register
 router.post("/register", validateAuthBody, async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, role } = req.body;
 
   try {
     const existingUser = await findUserByUsername(username);
@@ -20,19 +22,20 @@ router.post("/register", validateAuthBody, async (req, res) => {
       return res.status(400).json({ message: "Användarnamnet är redan taget" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10)
+    const hashedPassword = await hashPassword(password)
 
     const userId = generatePrefixedId("user");
     const newUser = await createUser({
       userId,
       username,
       password : hashedPassword,
-      role: "user",
+      role,
     });
 
     res.status(201).json({
       message: "Användare skapad",
       userId: newUser.userId,
+      role
     });
   } catch (err) {
     res
@@ -61,15 +64,11 @@ router.post("/login", validateAuthBody, async (req, res) => {
   }
 
   try {
-    const user = await User.findOne({ username });
-    const isSame = await bcrypt.compare(password, user.password)
+    const user = await findUserByUsername(username)
+    const correctPassword = await comparePasswords(password, user.password)
 
-    if (user && isSame) {
-      const token = jwt.sign({ userId : user.userId, username : user.username },
-        'emilia', {
-          expiresIn : 60 * 10 //10 min
-        }
-      )
+    if (user && correctPassword) {
+      const token = signToken({userId : user.userId});
 
       global.user = {
       userId: user.userId,
@@ -77,11 +76,11 @@ router.post("/login", validateAuthBody, async (req, res) => {
       role: user.role,
     };
 
-    res.json({
-      message: "Inloggning lyckades",
-      user: global.user,
-      token : `Bearer ${token}`
-    });
+      res.json({
+        message: "Inloggning lyckades",
+        user: global.user,
+        token : `Bearer ${token}`
+      });
     } else {
       return res
         .status(401)
