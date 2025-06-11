@@ -22,9 +22,6 @@ const database = mongoose.connection;
 app.use(express.json());
 app.use(logger);
 
-// Global user:
-global.user = null; // Lagra den inloggade användaren globalt
-
 // routes
 app.use("/api/cart", cartRoutes);
 app.use("/api/auth", authRoutes);

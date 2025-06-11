@@ -19,45 +19,45 @@ export async function getCart(cartId) {
   }
 }
 
-export const updateCart = async (req, res, next) => {
+export async function updateCart(userId, product) {
   try {
-    const { prodId, qty, guestId } = req.body;
-    const userId = global.user?.userId || guestId || `${generatePrefixedId("guest")}`;
-
-     // Byt ut prefixet 'user-' eller 'guest-' mot 'cart-'
     const cartId = userId.replace(/^(user|guest)-/, 'cart-');
 
     let cart = await Cart.findOne({ cartId });
 
     if (!cart) {
       cart = new Cart({
-        cartId: cartId,
+        cartId,
         userId,
         items: []
       });
     }
 
-    const index = cart.items.findIndex(item => item.prodId === prodId);
+    const index = cart.items.findIndex(item => item.prodId === product.prodId);
 
-    if (qty === 0) {
-      if (index !== -1) cart.items.splice(index, 1);
+    if (product.qty === 0) {
+      if (index !== -1) {
+        cart.items.splice(index, 1);
+      }
     } else {
       if (index !== -1) {
-        cart.items[index].qty = qty;
+        cart.items[index].qty = product.qty;
       } else {
-        cart.items.push({ prodId, qty });
+        cart.items.push({
+          prodId: product.prodId,
+          name: product.name,
+          price: product.price,
+          qty: product.qty
+        });
       }
     }
 
     await cart.save();
-    res.json({ 
-      success: true, 
-      cart
-    });
+    return cart;
   } catch (err) {
-    next(err);
+    throw new Error("Kunde inte uppdatera varukorgen: " + err.message);
   }
-};
+}
 
 export async function getAllCarts() {
   try {

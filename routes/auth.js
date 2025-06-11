@@ -1,12 +1,7 @@
 import express from "express";
-import User from "../models/user.js";
 import { generatePrefixedId } from "../utils/IdGenerator.js";
 import { createUser, findUserByUsername } from "../services/user.js";
 import { comparePasswords, hashPassword, signToken } from "../utils/bcryptAndTokens.js";
-
-import bcrypt from 'bcrypt'
-import jwt from 'jsonwebtoken'
-
 import { validateAuthBody } from "../middlewares/validators.js";
 
 const router = express.Router();
@@ -23,8 +18,8 @@ router.post("/register", validateAuthBody, async (req, res) => {
     }
 
     const hashedPassword = await hashPassword(password)
-
     const userId = generatePrefixedId("user");
+
     const newUser = await createUser({
       userId,
       username,
@@ -35,7 +30,7 @@ router.post("/register", validateAuthBody, async (req, res) => {
     res.status(201).json({
       message: "Användare skapad",
       userId: newUser.userId,
-      role
+      role : newUser.role,
     });
   } catch (err) {
     res
@@ -51,15 +46,10 @@ router.post("/login", validateAuthBody, async (req, res) => {
 
   if (continueAsGuest) {
     const guestId = generatePrefixedId("guest");
-    global.user = {
-      userId: guestId,
-      username: "Gäst",
-      role: "guest",
-    };
 
     return res.json({
       message: "Fortsätter som gäst",
-      user: global.user,
+      guestId: guestId,
     });
   }
 
@@ -70,15 +60,13 @@ router.post("/login", validateAuthBody, async (req, res) => {
     if (user && correctPassword) {
       const token = signToken({userId : user.userId});
 
-      global.user = {
-      userId: user.userId,
-      username: user.username,
-      role: user.role,
-    };
-
       res.json({
         message: "Inloggning lyckades",
-        user: global.user,
+        user: {
+        userId: user.userId,
+        username: user.username,
+        role: user.role,
+      },
         token : `Bearer ${token}`
       });
     } else {
@@ -94,7 +82,6 @@ router.post("/login", validateAuthBody, async (req, res) => {
 // LOGOUT
 // GET /api/auth/logout
 router.get("/logout", (req, res) => {
-  global.user = null;
   res.json({ message: "Utloggning lyckades!" });
 });
 
