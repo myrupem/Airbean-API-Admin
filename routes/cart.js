@@ -6,11 +6,13 @@ import { getAllCarts } from '../services/cart.js';
 import { verifyToken } from '../utils/bcryptAndTokens.js'
 import { getProductByProdId } from '../services/products.js';
 import { generatePrefixedId } from '../utils/IdGenerator.js';
+import { authenticateUser, isAdmin } from '../middlewares/auth.js';
+import { getUserByUserId } from '../services/user.js';
 
 const router = Router();
 
 // GET all carts
-router.get('/', async (req, res, next) => {
+router.get('/', authenticateUser, isAdmin, async (req, res, next) => {
   try {
     const carts = await getAllCarts();
     res.json({ success: true, carts });

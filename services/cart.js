@@ -1,7 +1,4 @@
 import Cart from "../models/cart.js";
-import Product from "../models/product.js";
-
-import { generatePrefixedId } from "../utils/IdGenerator.js";
 
 export async function getCart(cartId) {
   if (!cartId) throw new Error("Missing cartId");

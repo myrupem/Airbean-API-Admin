@@ -20,7 +20,7 @@ export function signToken(payLoad) {
     return token;
 }
 
-export function verifyToken (token) {
+export function verifyToken(token) {
     try {
         const decoded = jwt.verify(token, process.env.MYSECRET);
         return decoded;

@@ -1,13 +1,8 @@
 import express from "express";
-import jwt from 'jsonwebtoken'
-
 import Product from "../models/product.js";
-
 import { getAllProducts, createProduct, getProductByProdId, updateProduct } from "../services/products.js";
 import { generatePrefixedId } from "../utils/IdGenerator.js";
-import { getUserByUserId } from "../services/user.js"
-
-import { authenticateUser } from "../middlewares/auth.js";
+import { authenticateUser, isAdmin } from "../middlewares/auth.js";
 
 const router = express.Router();
 
@@ -23,7 +18,7 @@ router.get("/", async (req, res) => {
 });
 
 //Add new product
-router.post("/", authenticateUser, async (req, res) => {
+router.post("/", authenticateUser, isAdmin, async (req, res) => {
     const { title, desc, price } = req.body;
 
     if (!title || !desc || !price) {
@@ -51,7 +46,7 @@ router.post("/", authenticateUser, async (req, res) => {
 
 
 //Uppdatera produkt
-router.put( '/:prodId', authenticateUser, async(req, res) => {
+router.put( '/:prodId', authenticateUser, isAdmin, async(req, res) => {
     const { prodId } = req.params;
     const { title, desc, price } = req.body;
 
@@ -82,7 +77,7 @@ router.put( '/:prodId', authenticateUser, async(req, res) => {
   };
 });
 
-router.delete('/:prodId', authenticateUser, async (req, res) => {
+router.delete('/:prodId', authenticateUser, isAdmin, async (req, res) => {
   const { prodId } = req.params; 
 
   try {
