@@ -1,0 +1,83 @@
+info: 
+  description: API Documentation for Airbean API Admin
+  title: Airbean API Admin
+  version: 1.0.0
+openapi: 3.0.1
+components: 
+  schemas:
+    Token:
+      type: String
+      description: Token
+      example: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ1c2VyLTgzMWU0IiwiaWF0IjoxNzQ5NjM0NzE3LCJleHAiOjE3NDk2MzgzMTd9.GsC1ZD0g2NX55bosKOkX1i3zmHPz_RzRzW1CFlLBMn8
+  responses:
+    BadRequestError:
+      description: Bad request from client
+      content: 
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: String
+                example: Missing or invalid parameters in request
+    NotFoundError:
+      description: Resource not found
+      content: 
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: String
+                example: Requested resource not found
+paths:
+  /api/auth/logout:
+    get:
+      tags:
+        - API Auth
+      description: Logs out user
+      parameters:
+        - in: Header
+          name: token
+          required: true
+          schema: 
+            $ref: "#/components/schemas/Token"
+      responses:
+        "200":
+          description: Returns successfull logout
+          content: 
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: String
+                    example: "User logged out successfully"
+  /api/auth/register:
+    post:
+      tags:
+        - API Auth
+  /api/auth/login:
+    post:
+      tags:
+        - API Auth
+    post:
+      tags:
+        - API Auth
+  /api/menu/:
+    post:
+      tags:
+        - API Menu
+  /api/menu/{prodId}:
+    put:
+      tags:
+        - API Menu
+    delete:
+      tags:
+        - API Menu

@@ -3,6 +3,7 @@ import { generatePrefixedId } from "../utils/IdGenerator.js";
 import { createUser, findUserByUsername } from "../services/user.js";
 import { comparePasswords, hashPassword, signToken } from "../utils/bcryptAndTokens.js";
 import { validateAuthBody } from "../middlewares/validators.js";
+import { authenticateUser } from "../middlewares/auth.js";
 
 const router = express.Router();
 
@@ -81,7 +82,7 @@ router.post("/login", validateAuthBody, async (req, res) => {
 
 // LOGOUT
 // GET /api/auth/logout
-router.get("/logout", (req, res) => {
+router.get("/logout", authenticateUser, (req, res) => {
   res.json({ message: "Utloggning lyckades!" });
 });
 
