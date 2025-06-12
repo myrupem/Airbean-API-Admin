@@ -5,11 +5,12 @@ import { createOrder } from "../services/order.js";
 
 import { validateCartInBody } from "../middlewares/validators.js";
 import { validateUser } from "../middlewares/validators.js";
+import { authenticateUser, isAdmin, authorizeCartAccess } from "../middlewares/auth.js";
 
 const router = Router();
 
 // GET all orders - /api/orders
-router.get("/", async (req, res, next) => {
+router.get("/", authenticateUser, isAdmin, async (req, res, next) => {
   try {
     const orders = await getAllOrders();
     if (orders && orders.length > 0) {
@@ -51,7 +52,7 @@ router.get("/:userId", validateUser, async (req, res, next) => {
 
 
 //Create order route
-router.post("/", validateCartInBody, async (req, res) => {
+router.post("/", validateCartInBody, authorizeCartAccess, async (req, res) => {
 
   const { cartId } = req.body;
 

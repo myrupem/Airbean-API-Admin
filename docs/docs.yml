@@ -1,0 +1,320 @@
+info: 
+  description: API Documentation for Airbean API Admin
+  title: Airbean API Admin
+  version: 1.0.0
+openapi: 3.0.1
+components:
+  securitySchemes:
+      bearerAuth:
+        type: http
+        scheme: bearer
+        bearerFormat: JWT
+  schemas:
+    Token:
+      type: string
+      description: Token
+      example: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ1c2...
+    User:
+      description: User Body
+      type: object
+      properties:
+        userId:
+          type: string
+          example: user-12345
+        username:
+          type: string
+          example: EmiliaMyrup
+        password:
+          type: string
+          example: secretPassword
+        role:
+          type: string
+          example: User
+    UserBodyLogin:
+      description: User Body
+      type: object
+      properties:
+        username:
+          type: string
+          example: EmiliaMyrup
+        password:
+          type: string
+          example: secretPassword
+    UserBodyReg:
+      description: User Body
+      type: object
+      properties:
+        username:
+          type: string
+          example: EmiliaMyrup
+        password:
+          type: string
+          example: secretPassword
+        role:
+          type: string
+          example: User
+    GuestBody:
+      description: Guest Body
+      type: object
+      properties:
+        continueAsGuest: 
+          type: boolean
+    ProductBody:
+      description: Product Body
+      type: object
+      properties:
+        title:
+          type: string
+          example: Emilias Kaffe Starka Bönor
+        desc:
+          type: string
+          example: Bryggd på månadens bönor.
+        price:
+          type: number
+          example: 49
+    Product:
+      description: Product
+      type: object
+      properties:
+        prodId: 
+          type: string
+          example: prod-44ec0
+        title:
+          type: string
+          example: Emilias Kaffe Starka Bönor
+        desc:
+          type: string
+          example: Bryggd på månadens bönor.
+        price:
+          type: number
+          example: 49
+        createdAt:
+          type: string
+          example: Thu Jun 12 2025 09:02:09 GMT+0200 (centraleuropeisk sommartid)
+        modifiedAt:
+          type: string
+          example: Thu Jun 12 2025 09:02:09 GMT+0200 (centraleuropeisk sommartid)
+  responses:
+    BadRequestError:
+      description: Bad request from client
+      content: 
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: String
+                example: Missing or invalid parameters in request
+    NotFoundError:
+      description: Resource not found
+      content: 
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: String
+                example: Requested resource not found
+paths:
+  /api/auth/logout:
+    get:
+      tags:
+        - API Auth
+      description: Logs out user. Requires a valid JWT token.
+      parameters:
+        - in: Header
+          name: token
+          required: true
+          schema: 
+            $ref: "#/components/schemas/Token"
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Response for successful logout
+          content: 
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User logged out successfully"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+  /api/auth/register:
+    post:
+      tags:
+        - API Auth
+      description: Register new user. Role can be "User" or "Admin".
+      parameters:
+        - in: Header
+          name: token
+          required: true
+          schema: 
+            $ref: "#/components/schemas/Token"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#components/schemas/UserBodyReg"
+      responses:
+        "200":
+          description: Response for successful register
+          content: 
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User registered successfully"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+  /api/auth/login:
+    post:
+      tags:
+        - API Auth
+      description: Login user. Guest login possible. If so body request is: "continueAsGuest": "true"
+      parameters:
+        - in: Header
+          name: token
+          required: true
+          schema: 
+            $ref: "#/components/schemas/Token"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserBodyLogin"
+      responses:
+        "200":
+          description: Response for successful login
+          content: 
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User logged in successfully"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+  /api/menu/:
+    post:
+      tags:
+        - API Menu
+      description: Post new product. Requires a valid JWT token and Admin role rights.
+      parameters:
+        - in: Header
+          name: token
+          required: true
+          schema: 
+            $ref: "#/components/schemas/Token"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#components/schemas/ProductBody"
+      responses:
+        "200":
+          description: Response for successful adding of new product
+          content: 
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Product created
+                  newProduct:
+                      $ref: "#components/schemas/Product"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+  /api/menu/{prodId}:
+    put:
+      tags:
+        - API Menu
+      description: Update product. Requires a valid JWT token and Admin role rights.
+      parameters:
+        - in: Header
+          name: token
+          required: true
+          schema: 
+            $ref: "#/components/schemas/Token"
+        - in: path
+          name: prodId
+          required: true
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#components/schemas/ProductBody"
+      responses:
+        "200":
+          description: Response for successfully updating product
+          content: 
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Product created
+                  newProduct:
+                    $ref: "#components/schemas/Product"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+    delete:
+      tags:
+        - API Menu
+      description: Delete product. Requires a valid JWT token and Admin role rights.
+      parameters:
+        - in: Header
+          name: token
+          required: true
+          schema: 
+            $ref: "#/components/schemas/Token"
+        - in: path
+          name: prodId
+          required: true
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Response for successfully deleting product
+          content: 
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: 
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Product deleted
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
